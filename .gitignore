@@ -1,0 +1,15 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Qdrant persistent storage
+qdrant_data/
+
+# Temporary files
+temp.py

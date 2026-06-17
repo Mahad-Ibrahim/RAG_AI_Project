@@ -1,0 +1,25 @@
+[DEVELOPER ONBOARDING GUIDE]
+
+HOW TO RESTART THE SERVICES:
+Do not use 'systemctl'. We use Docker Compose.
+Command: docker-compose restart backend
+
+HOW TO FLUSH REDIS CACHE:
+If the user sessions are stuck, run this script:
+```python
+import redis
+r = redis.Redis(host='localhost', port=6379, db=0)
+r.flushall()
+print("Cache cleared!")
+```
+
+GIT WORKFLOW:
+1. Feature branches must be named 'feat/ticket-id'.
+2. Hotfixes must be named 'hotfix/issue-id'.
+3. Never push directly to 'main'.
+
+COMMON PORTS:
+- 3000: React Frontend
+- 8000: FastAPI Backend
+- 6333: Qdrant Vector DB
+- 9090: Prometheus Metrics

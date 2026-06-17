@@ -1,0 +1,20 @@
+[CONFIDENTIAL - INFRASTRUCTURE OVERVIEW 2025]
+
+SECTION 1: PRODUCTION ENVIRONMENT (PROD)
+- Load Balancer: lb-prod-01 (IP: 10.0.1.5) | Nginx 1.25
+- Web Server Cluster:
+  * web-prod-01 (IP: 10.0.1.10) - Hosting the Frontend React App
+  * web-prod-02 (IP: 10.0.1.11) - Hosting the Frontend React App (Replica)
+- Database Primary: db-prod-primary (IP: 10.0.1.50) - PostgreSQL 16
+  * Port: 5432
+  * Connection String: postgres://admin:ProdSecureKey!@10.0.1.50:5432/main_db
+
+SECTION 2: STAGING ENVIRONMENT (STG)
+- Web Server: web-stg-01 (IP: 10.0.2.10)
+- Database: db-stg-01 (IP: 10.0.2.50)
+  * Note: The staging database is reset every Sunday at 03:00 UTC.
+
+SECTION 3: LEGACY SYSTEMS (DEPRECATED)
+- Old FTP Server: ftp-legacy (IP: 192.168.100.5)
+- Status: TO BE DECOMMISSIONED on Dec 31st, 2025.
+- Do not deploy new apps here.

@@ -1,0 +1,26 @@
+[INCIDENT LOGS - Q3 2025]
+
+INCIDENT #8821
+Date: 2025-10-12
+Severity: HIGH
+Error Code: 0x8004005 (Access Denied)
+Description: The API Gateway failed to authenticate with the Auth0 provider.
+Root Cause: The API Token expired.
+Resolution: Rotated the API Key. The new key is 'sk_live_998877_updated'. 
+Action Item: Update the .env file on web-prod-01.
+
+INCIDENT #9902
+Date: 2025-11-01
+Severity: CRITICAL
+Error Code: OOM_KILLER (Out of Memory)
+Description: db-prod-primary crashed.
+Logs: "System ran out of memory, process postgres (PID 4421) invoked oom-killer."
+Resolution: Increased RAM from 16GB to 32GB. Added 8GB Swap.
+Command used to fix: swapon /swapfile
+
+INCIDENT #1005
+Date: 2025-11-15
+Severity: LOW
+Issue: Deployment Script Failure
+Error: "rsync: connection unexpectedly closed"
+Fix: The SSH key permissions were wrong. Ran 'chmod 600 ~/.ssh/id_rsa' to fix it.
