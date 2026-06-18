@@ -43,7 +43,6 @@ This document explains how this project works from the ground up. No prior knowl
 
 This is an AI chatbot that answers questions about an internal DevOps knowledge base. Instead of a generic chatbot that only knows what it was trained on, this bot can look things up in a private database of documents — incident logs, infrastructure maps, credentials, cheatsheets — and give accurate, grounded answers.
 
-The Discord interface was used for development and demonstration. **Your job is to replace that Discord interface with a TUI, GUI, or web app.** The AI engine itself is already complete and does not need to be changed.
 
 ---
 
@@ -286,7 +285,7 @@ The LLM reads all of this and generates a final answer. Because the relevant doc
 AI_Project/
 │
 ├── bot/
-│   ├── main.py          ← Entry point. Runs the Discord bot + CLI interface.
+│   ├── main.py          ← Entry point. Runs the  CLI interface.
 │   │                      YOUR TEAMMATES REPLACE THIS FILE.
 │   │
 │   ├── rag_logic.py     ← The core AI engine. Contains the RagEngine class
@@ -417,11 +416,7 @@ Create `bot/.env` with the following contents:
 # Groq API key — get one free at https://console.groq.com
 Ai_Api_Key=your_groq_api_key_here
 
-# Discord bot token — only needed for the Discord interface
-Bot_Token=your_discord_bot_token_here
 ```
-
-> **Note for teammates:** When you replace the Discord interface, you do NOT need `Bot_Token`. You only need `Ai_Api_Key` to run the AI engine.
 
 ---
 
@@ -617,7 +612,7 @@ Confirm the data is in Qdrant by opening `http://localhost:6333/dashboard` and c
 python main.py
 ```
 
-The original `main.py` runs a CLI interface alongside the Discord bot. Since you are replacing the Discord interface, you will replace `main.py` entirely. Use the skeleton from [Section 12](#12-the-public-api-you-need-to-call) as your starting point.
+The original `main.py` runs a CLI interface.
 
 To test that the AI engine is working before building your interface, you can temporarily run `main.py` and type questions in the CLI.
 
@@ -675,23 +670,7 @@ docker-compose up -d
 docker-compose ps
 ```
 
----
-
-## 11. Your Job — Replacing the Discord Interface
-
-The only file you need to touch is `main.py`. The entire `RagEngine` class in `rag_logic.py` is complete and should not be modified.
-
-The Discord-specific code in `main.py` does the following things:
-
-1. Receives a message from a user
-2. Loads that user's conversation history from Redis
-3. Calls `engine.get_rag_response(message, history)` to get the AI's reply
-4. Saves the new message pair to Redis
-5. Sends the response back to the user
-
-Your GUI/TUI/Web App needs to do the same five things, just with a different interface layer. The AI pipeline (steps 3 and 4) is identical regardless of the interface.
-
----
+--
 
 ## 12. The Public API You Need to Call
 
@@ -749,7 +728,7 @@ memory.client.delete(user_id)
 
 `engine.get_rag_response()` is a **synchronous, blocking** function. It makes two network calls to the Groq API and one call to Qdrant. In a GUI or web app with an event loop (e.g., asyncio, tkinter, Qt), you must run it in a background thread to avoid freezing the UI.
 
-Python example using `asyncio` (same pattern as the Discord bot):
+Python example using `asyncio`:
 
 ```python
 import asyncio
@@ -761,67 +740,7 @@ response_text = await loop.run_in_executor(
 )
 ```
 
-### Full Minimal Example
 
-This is the minimal skeleton your interface needs:
-
-```python
-import sys
-from rag_logic import RagEngine
-from memory import RedisMemory
-from langchain_core.messages import HumanMessage, AIMessage
-
-# --- STARTUP (run once) ---
-engine = RagEngine()
-memory = RedisMemory()
-
-def handle_user_message(user_id: str, user_text: str) -> str:
-    """
-    Call this function whenever a user submits a message.
-    Returns the AI's response as a string.
-    """
-    # Load history
-    history = memory.get_messages(user_id)
-
-    # Get AI response
-    response = engine.get_rag_response(user_text, history)
-
-    # Persist to memory
-    memory.add_message(user_id, HumanMessage(content=user_text))
-    memory.add_message(user_id, AIMessage(content=response))
-
-    return response
-
-
-def handle_reset(user_id: str):
-    """Call this when the user wants to clear their conversation history."""
-    memory.client.delete(user_id)
-
-
-# --- YOUR UI CODE GOES HERE ---
-# Replace this with your TUI / GUI / web framework
-if __name__ == "__main__":
-    user_id = "local_user"
-    print("AI Assistant ready. Type 'quit' to exit, 'reset' to clear history.\n")
-
-    while True:
-        user_input = input("You: ").strip()
-
-        if not user_input:
-            continue
-        if user_input.lower() == "quit":
-            break
-        if user_input.lower() == "reset":
-            handle_reset(user_id)
-            print("History cleared.\n")
-            continue
-
-        print("Thinking...")
-        reply = handle_user_message(user_id, user_input)
-        print(f"Bot: {reply}\n")
-```
-
----
 
 ## Summary of Data Flow
 
