@@ -149,3 +149,4 @@ if __name__ == "__main__":
     discord_thread.start()
     
     start_cli_interface(shared_rag_engine)
+

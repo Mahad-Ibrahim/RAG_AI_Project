@@ -117,7 +117,7 @@ class RagEngine:
         # print("\n--- DEBUG: ITEMS FROM LLM ---")
         # print(f"The paragraph is: {paragraph}")
         # print("----------------------------------\n")
-        if paragraph[0] != "NO_RAG" and paragraph[0] != "":
+       if paragraph[0] != "NO_RAG" and paragraph[0] != "":
             return paragraph
         return None
 
@@ -190,3 +190,4 @@ class RagEngine:
 # if __name__ == "__main__":
 #     main()
  
+
