@@ -45,6 +45,10 @@ jobs:
           docker compose up -d rag-web qdrant-db
           sleep 20
 
+      - name: Debug Container Startup
+        if: failure()
+        run: docker compose logs rag-web
+
       - name: Run Data Ingestion
         env:
           CI_FAST_MODE: "true"  

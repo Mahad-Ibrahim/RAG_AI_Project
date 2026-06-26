@@ -36,4 +36,5 @@ services:
       # Tell the Python app how to find the other containers on the Docker network
       - REDIS_HOST=redis-cache
       - QDRANT_URL=http://qdrant-db:6333
+      - Ai_Api_Key=${Ai_Api_Key}
     restart: unless-stopped
