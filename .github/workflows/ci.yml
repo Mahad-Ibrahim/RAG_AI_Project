@@ -32,11 +32,14 @@ jobs:
       - name: Start Infrastructure (Qdrant & Redis)
         run: |
           docker compose up -d
-          sleep 10
+          sleep 15
+
+      - name: Run Data Ingestion
+        run: |
+          docker compose exec rag-web python ingest.py
 
       - name: Run Automated AI Tests
         env:
-          # Pass the secret as GROQ_API_KEY (standard) and Ai_Api_Key (your code)
           GROQ_API_KEY: ${{ secrets.AI_API_KEY }}
           Ai_Api_Key: ${{ secrets.AI_API_KEY }}
         run: |
