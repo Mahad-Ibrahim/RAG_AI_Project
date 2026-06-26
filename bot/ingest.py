@@ -3,20 +3,27 @@ import glob
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import FastEmbedEmbeddings
+from langchain_core.embeddings import FakeEmbeddings
 from langchain_qdrant import QdrantVectorStore, FastEmbedSparse, RetrievalMode
 from qdrant_client import QdrantClient, models
 
 COLLECTION_NAME = "knowledge_base"
 
 def ingest_data():
-    # 1. Setup Embeddings and Client
-    embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+    # Detect if we are in CI to save memory
+    is_ci = os.getenv("CI") == "true"
+    
+    if is_ci:
+        print("CI detected: Using FakeEmbeddings to save memory.")
+        embeddings = FakeEmbeddings(size=384)
+    else:
+        embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+    
     sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
     
     qdrant_url = os.getenv("QDRANT_URL", "http://qdrant-db:6333")
     client = QdrantClient(url=qdrant_url)
     
-    # Setup collection
     if client.collection_exists(COLLECTION_NAME):
         client.delete_collection(COLLECTION_NAME)
     
@@ -26,7 +33,6 @@ def ingest_data():
         sparse_vectors_config={"langchain-sparse": models.SparseVectorParams()}
     )
 
-    # 2. Initialize Vector Store
     vector_store = QdrantVectorStore(
         client=client,
         collection_name=COLLECTION_NAME,
@@ -35,7 +41,6 @@ def ingest_data():
         retrieval_mode=RetrievalMode.HYBRID
     )
 
-    # 3. Process files one-by-one to save RAM
     files = glob.glob("Data/**/*.txt", recursive=True)
     if not files:
         print("Error: No Documents found.")
@@ -49,14 +54,11 @@ def ingest_data():
             loader = TextLoader(file_path)
             docs = loader.load()
             chunks = split_text.split_documents(docs)
-            
-            # Add one file's worth of chunks to the vector store
             vector_store.add_documents(chunks)
         except Exception as e:
             print(f"Skipping {file_path} due to error: {e}")
 
     print("Success. Data was inserted successfully.")
 
-# This ensures the script runs when called via python ingest.py
 if __name__ == "__main__":
     ingest_data()
