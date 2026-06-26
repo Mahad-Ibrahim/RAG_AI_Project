@@ -40,3 +40,12 @@ jobs:
       - name: Shutdown Infrastructure
         if: always()
         run: docker compose down
+
+       - name: Create .env file
+         run: |
+           echo "Ai_Api_Key=${{ secrets.AI_API_KEY }}" > bot/.env
+
+      - name: Start Infrastructure (Qdrant & Redis)
+        run: |
+          docker compose up -d
+          sleep 10
