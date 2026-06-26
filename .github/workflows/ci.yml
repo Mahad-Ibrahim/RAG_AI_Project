@@ -57,7 +57,7 @@ jobs:
           CI_FAST_MODE: "true"  
           Ai_Api_Key: ${{ secrets.AI_API_KEY }}
         run: |
-          docker compose exec rag-web python ingest.py
+          docker compose run --rm rag-web python ingest.py
 
       - name: Run Automated AI Tests
         env:

@@ -20,6 +20,7 @@ services:
       context: ./bot
       dockerfile: Dockerfile
     container_name: rag-web
+    tty: true
     ports:
       - "8000:8000"
     volumes:               
