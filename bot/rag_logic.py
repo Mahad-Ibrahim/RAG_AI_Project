@@ -58,8 +58,8 @@ class RagEngine:
             model_name="Qdrant/bm25"
         )
         
-        self.qdrantClient = QdrantClient(url="http://localhost:6333")
-        
+        qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+        self.qdrantClient = QdrantClient(url=qdrant_url)
         
         vectorStorage = QdrantVectorStore(
             client=self.qdrantClient,
@@ -117,7 +117,7 @@ class RagEngine:
         # print("\n--- DEBUG: ITEMS FROM LLM ---")
         # print(f"The paragraph is: {paragraph}")
         # print("----------------------------------\n")
-       if paragraph[0] != "NO_RAG" and paragraph[0] != "":
+        if paragraph[0] != "NO_RAG" and paragraph[0] != "":
             return paragraph
         return None
 

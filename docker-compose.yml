@@ -10,7 +10,6 @@ services:
       - ./qdrant_data:/qdrant/storage
     restart: unless-stopped
 
-
   redis-cache:
     image: redis:alpine
     container_name: rag-redis
@@ -18,3 +17,23 @@ services:
       - "6379:6379"
     restart: unless-stopped
 
+  rag-web:
+    build: 
+      context: ./bot
+      dockerfile: Dockerfile
+      network: host
+    container_name: rag-web
+    ports:
+      - "8000:8000"
+    volumes:                      
+      - ./Data:/app/Data  
+    depends_on:
+      - qdrant-db
+      - redis-cache
+    env_file:
+      - ./bot/.env
+    environment:
+      # Tell the Python app how to find the other containers on the Docker network
+      - REDIS_HOST=redis-cache
+      - QDRANT_URL=http://qdrant-db:6333
+    restart: unless-stopped

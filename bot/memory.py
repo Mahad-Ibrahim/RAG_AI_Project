@@ -1,55 +1,42 @@
-import json
+import os
 import redis
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+import json
+from langchain_core.messages import HumanMessage, AIMessage
 
 class RedisMemory:
     def __init__(self):
-        self.ttl = 300
-        self.port = 6379
-        self.host = 'localhost'
-        self.db = 0
+        # Securely grab the Redis hostname from the Docker environment variables
+        redis_host = os.getenv("REDIS_HOST", "redis-cache")
         
+        # Initialize the connection directly to the Docker container
+        self.client = redis.Redis(host=redis_host, port=6379, db=0, decode_responses=True)
+
+    def get_messages(self, user_id):
         try:
-            self.client = redis.Redis(
-                db=self.db,
-                decode_responses=True
-            )
-            
-            self.client.ping()
-            
-        except Exception as e:
-            print(f"Error connecting to Redis: {e}")
-            self.client = None    
-        
-        
-        
-    def add_message(self, key, content: HumanMessage | AIMessage):
-        
-        msg = json.dumps({
-            "type": "human" if isinstance(content, HumanMessage) else "ai",
-            "content": content.content
-        })
-        
-        self.client.rpush(key, msg)
-        self.client.expire(key, self.ttl)
-        
-        if self.client.llen(key) > 20:
-            self.client.lpop(key)
-    
-    def get_messages(self, key : json):
-        message_json = self.client.lrange(key,0, -1)
-        chat_history = []
-        if not message_json:
-            return []
-        if message_json:
-            for val in message_json:
-                msg= json.loads(val)
-                if msg["type"] == "human":
-                    chat_history.append(HumanMessage(content=msg["content"]))
+            # lrange retrieves the chat history list for the specific user
+            raw_messages = self.client.lrange(user_id, 0, -1)
+            messages = []
+            for msg in raw_messages:
+                data = json.loads(msg)
+                if data["type"] == "human":
+                    messages.append(HumanMessage(content=data["content"]))
                 else:
-                    chat_history.append(AIMessage(content=msg["content"]))
-        
-        return chat_history
-    
+                    messages.append(AIMessage(content=data["content"]))
+            return messages
+        except Exception:
+            # If Redis is temporarily unavailable, return an empty history instead of crashing
+            return []
 
-
+    def add_message(self, user_id, message):
+        try:
+            data = {
+                "type": "human" if isinstance(message, HumanMessage) else "ai", 
+                "content": message.content
+            }
+            # rpush adds the new message to the end of the user's list
+            self.client.rpush(user_id, json.dumps(data))
+            
+            # Keep only the last 10 messages so the AI context window doesn't overflow
+            self.client.ltrim(user_id, -10, -1)
+        except Exception as e:
+            print(f"Redis Error: {e}")

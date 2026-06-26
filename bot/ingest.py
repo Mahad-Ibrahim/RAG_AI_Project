@@ -33,7 +33,8 @@ def ingest_data():
     
     try:
         
-        client = QdrantClient(url="http://localhost:6333")
+        qdrant_url = os.getenv("QDRANT_URL", "http://qdrant-db:6333")
+        client = QdrantClient(url=qdrant_url)
         
         if client.collection_exists(COLLECTION_NAME):
             client.delete_collection(COLLECTION_NAME)
