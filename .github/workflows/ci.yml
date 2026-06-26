@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Data Ingestion
         env:
-          CI: "true"
+          CI_FAST_MODE: "true"  
           Ai_Api_Key: ${{ secrets.AI_API_KEY }}
         run: |
           docker compose exec rag-web python ingest.py
