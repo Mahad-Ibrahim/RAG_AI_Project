@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   qdrant-db:
     image: qdrant/qdrant:latest
@@ -21,19 +19,15 @@ services:
     build: 
       context: ./bot
       dockerfile: Dockerfile
-      network: host
     container_name: rag-web
     ports:
       - "8000:8000"
-    volumes:                      
+    volumes:               
       - ./Data:/app/Data  
     depends_on:
       - qdrant-db
       - redis-cache
-    env_file:
-      - ./bot/.env
     environment:
-      # Tell the Python app how to find the other containers on the Docker network
       - REDIS_HOST=redis-cache
       - QDRANT_URL=http://qdrant-db:6333
       - Ai_Api_Key=${Ai_Api_Key}

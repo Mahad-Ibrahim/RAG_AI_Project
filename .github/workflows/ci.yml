@@ -40,8 +40,11 @@ jobs:
           echo "Ai_Api_Key=${{ secrets.AI_API_KEY }}" > bot/.env
 
       - name: Start Infrastructure
+        env:
+          # This maps your GitHub Secret (AI_API_KEY) to the variable 
+          # the Python code needs (Ai_Api_Key)
+          Ai_Api_Key: ${{ secrets.AI_API_KEY }}
         run: |
-          # Start only web and db to save RAM
           docker compose up -d rag-web qdrant-db
           sleep 20
 
