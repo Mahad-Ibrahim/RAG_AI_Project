@@ -23,4 +23,4 @@ Date: 2025-11-15
 Severity: LOW
 Issue: Deployment Script Failure
 Error: "rsync: connection unexpectedly closed"
-Fix: The SSH key permissions were wrong. Ran 'chmod 600 ~/.ssh/id_rsa' to fix it.
+Fix: The SSH key permissions were wrong. Ran 'chmod 600 ~/.ssh/id_rsa' to fix it
