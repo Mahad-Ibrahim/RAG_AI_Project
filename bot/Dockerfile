@@ -10,6 +10,10 @@ RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple --def
 
 COPY . .
 
+RUN chmod +x start.sh
+
 EXPOSE 8000
 
-CMD ["python", "main.py"]
+CMD ["/app/start.sh"]
+
+

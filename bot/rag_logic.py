@@ -6,7 +6,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_qdrant import QdrantVectorStore
 from langchain_core.messages import HumanMessage, AIMessage
 from qdrant_client import QdrantClient
-from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda
 from langchain_qdrant import FastEmbedSparse, RetrievalMode
@@ -27,10 +26,17 @@ class RagEngine:
             model="llama-3.1-8b-instant",
             temperature=0.5
         )
+    
+        is_ci = os.getenv("CI_FAST_MODE") == "true"
         
-        self.embeddings = FastEmbedEmbeddings(
-            model_name="BAAI/bge-small-en-v1.5"
-        )
+        if is_ci:
+            from langchain_core.embeddings import FakeEmbeddings
+            self.embeddings = FakeEmbeddings(size=384)
+        else:
+            from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+            self.embeddings = FastEmbedEmbeddings(
+                model_name="BAAI/bge-small-en-v1.5"
+            )
         
         self.sparse_embeddings = FastEmbedSparse(
             model_name="Qdrant/bm25"
